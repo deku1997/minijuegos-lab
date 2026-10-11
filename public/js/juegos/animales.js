@@ -2,19 +2,16 @@
 
 (function(){
   const ANIMALES = [
-    // Nivel 1: 3 letras
     { es:'VACA',  en:'COW',    emoji:'🐮' },
     { es:'GATO',  en:'CAT',    emoji:'🐱' },
     { es:'PATO',  en:'DUCK',   emoji:'🦆' },
     { es:'PEZ',   en:'FISH',   emoji:'🐟' },
     { es:'OSO',   en:'BEAR',   emoji:'🐻' },
-    // Nivel 2: 4-5 letras
     { es:'PERRO', en:'DOG',    emoji:'🐶' },
     { es:'CABRA', en:'GOAT',   emoji:'🐐' },
     { es:'OVEJA', en:'SHEEP',  emoji:'🐑' },
     { es:'TIGRE', en:'TIGER',  emoji:'🐯' },
     { es:'LEÓN',  en:'LION',   emoji:'🦁' },
-    // Nivel 3: bilingüe variado
     { es:'RANA',  en:'FROG',   emoji:'🐸' },
     { es:'PÁJARO',en:'BIRD',   emoji:'🐦' },
     { es:'LOBO',  en:'WOLF',   emoji:'🐺' },
@@ -24,6 +21,20 @@
 
   const RONDAS = 8;
   const LETRAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  // Nombres de las letras en español e inglés para pronunciarlas correctamente
+  const NOMBRE_ES = {
+    'A':'a','B':'be','C':'ce','D':'de','E':'e','F':'efe','G':'ge','H':'hache',
+    'I':'i','J':'jota','K':'ka','L':'ele','M':'eme','N':'ene','Ñ':'eñe','O':'o',
+    'P':'pe','Q':'cu','R':'erre','S':'ese','T':'te','U':'u','V':'uve','W':'doble uve',
+    'X':'equis','Y':'i griega','Z':'zeta'
+  };
+  const NOMBRE_EN = {
+    'A':'ay','B':'bee','C':'see','D':'dee','E':'ee','F':'ef','G':'gee','H':'aitch',
+    'I':'eye','J':'jay','K':'kay','L':'el','M':'em','N':'en','O':'oh','P':'pee',
+    'Q':'cue','R':'ar','S':'ess','T':'tee','U':'you','V':'vee','W':'double you',
+    'X':'ex','Y':'why','Z':'zee'
+  };
 
   let st = null;
 
@@ -46,7 +57,6 @@
       st = { ronda:0, aciertos:0, api, fase:'es' };
       const $ = id => document.getElementById(id);
 
-      // Inyectar estilos específicos del juego (solo una vez)
       if (!document.getElementById('estilo-animales')) {
         const s = document.createElement('style');
         s.id = 'estilo-animales';
@@ -170,7 +180,7 @@
         st.animal = animal;
         st.fase = 'es';
         st.palabraCompletada = false;
-        st.letrasUsadas = []; // Array de letras seleccionadas (permite repetición)
+        st.letrasUsadas = [];
         st.bloqueado = false;
 
         $('animal-img').textContent = animal.emoji;
@@ -185,7 +195,12 @@
         $('inst').innerHTML =
           `Completa la palabra: <span style="color:#22d3ee">${animal.es}</span>` +
           `<span class="en">Complete the word: ${animal.en}</span>`;
-        window.decir('Completa la palabra. ' + animal.es + '. ' + animal.en);
+
+        // Voz bilingüe correcta
+        window.decirBilingue(
+          'Completa la palabra. ' + animal.es,
+          'Complete the word. ' + animal.en
+        );
 
         construirBanco(animal.es);
       }
@@ -209,22 +224,15 @@
         });
       }
 
-      /* Pinta la palabra consumiendo las letras puestas UNA POR UNA */
       function pintarPalabra(fase, palabra, letrasPuestas){
         const elId = fase === 'es' ? 'palabra-es' : 'palabra-en';
         const el = document.getElementById(elId);
         if (!el) return;
-
-        // Copia de las letras puestas para ir consumiéndolas
         const restantes = [...letrasPuestas];
-
         el.innerHTML = palabra.split('').map(c => {
           const idx = restantes.indexOf(c);
           let lleno = false;
-          if (idx !== -1){
-            lleno = true;
-            restantes.splice(idx, 1); // Consumir esta ocurrencia
-          }
+          if (idx !== -1){ lleno = true; restantes.splice(idx, 1); }
           return `<span class="letra-slot ${fase === 'en' ? 'en' : ''} ` +
                  `${lleno ? 'lleno' : 'vacia'}">${lleno ? c : '_'}</span>`;
         }).join('');
@@ -234,10 +242,7 @@
         if (st.bloqueado || st.palabraCompletada) return;
 
         const palabra = st.fase === 'es' ? st.animal.es : st.animal.en;
-
-        // Contar cuántas veces aparece la letra en la palabra
         const enPalabra = palabra.split('').filter(c => c === letra).length;
-        // Contar cuántas veces ya se ha puesto
         const puestas = st.letrasUsadas.filter(c => c === letra).length;
 
         if (enPalabra === 0 || puestas >= enPalabra){
@@ -247,19 +252,23 @@
           return;
         }
 
-        // Agregar SOLO UNA ocurrencia
+        // Pronunciar la letra según la fase (español o inglés)
+        if (st.fase === 'es'){
+          window.decir(NOMBRE_ES[letra] || letra);
+        } else {
+          window.decirEn(NOMBRE_EN[letra] || letra);
+        }
+
         st.letrasUsadas.push(letra);
         btn.classList.add('ok');
         window.tono(600 + st.letrasUsadas.length * 50, 0.08, 'square');
 
-        // Si ya se completaron todas las ocurrencias de esta letra, deshabilitar botón
         if (st.letrasUsadas.filter(c => c === letra).length >= enPalabra){
           setTimeout(() => btn.classList.add('usada'), 300);
         }
 
         pintarPalabra(st.fase, palabra, st.letrasUsadas);
 
-        // ¿Completó la palabra? (contar ocurrencias por letra)
         const unicasPalabra = [...new Set(palabra.split(''))];
         const completo = unicasPalabra.every(l => {
           const enPal = palabra.split('').filter(c => c === l).length;
@@ -272,7 +281,10 @@
           window.melodia([880, 1100]);
 
           if (st.fase === 'es'){
-            window.decir('¡Muy bien! Ahora en inglés: ' + st.animal.en);
+            window.decirBilingue(
+              '¡Muy bien! Ahora en inglés',
+              'Now in English: ' + st.animal.en
+            );
             setTimeout(() => {
               st.fase = 'en';
               st.palabraCompletada = false;
@@ -282,11 +294,14 @@
               $('inst').innerHTML =
                 `Ahora en inglés: <span style="color:#e879f9">${st.animal.en}</span>` +
                 `<span class="en">Now in English: ${st.animal.en}</span>`;
-            }, 1100);
+            }, 1400);
           } else {
             st.aciertos++;
-            window.decir('¡Excelente! ' + st.animal.es + ' en inglés es ' + st.animal.en);
-            setTimeout(() => { ronda(); }, 1200);
+            window.decirBilingue(
+              '¡Excelente! ' + st.animal.es,
+              'Excellent! ' + st.animal.en
+            );
+            setTimeout(() => { ronda(); }, 1400);
           }
         }
       }

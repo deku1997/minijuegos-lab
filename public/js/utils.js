@@ -24,6 +24,7 @@ window.melodia = function(notas, dur=0.18, gap=135){
   notas.forEach((f,i) => setTimeout(() => window.tono(f, dur, 'triangle', 0.2), i * gap));
 };
 
+/* ─── VOZ ESPAÑOL ─── */
 window.decir = function(texto){
   if (!window.SONIDO || !('speechSynthesis' in window)) return;
   try{
@@ -31,6 +32,31 @@ window.decir = function(texto){
     const u = new SpeechSynthesisUtterance(texto);
     u.lang = 'es-ES'; u.rate = 0.95; u.pitch = 1.25;
     speechSynthesis.speak(u);
+  } catch(e){}
+};
+
+/* ─── VOZ INGLÉS (evita que deletree palabras) ─── */
+window.decirEn = function(texto){
+  if (!window.SONIDO || !('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.15;
+    speechSynthesis.speak(u);
+  } catch(e){}
+};
+
+/* ─── VOZ BILINGÜE: dice español y luego inglés ─── */
+window.decirBilingue = function(textoEs, textoEn){
+  if (!window.SONIDO || !('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u1 = new SpeechSynthesisUtterance(textoEs);
+    u1.lang = 'es-ES'; u1.rate = 0.95; u1.pitch = 1.25;
+    const u2 = new SpeechSynthesisUtterance(textoEn);
+    u2.lang = 'en-US'; u2.rate = 0.85; u2.pitch = 1.15;
+    speechSynthesis.speak(u1);
+    speechSynthesis.speak(u2);
   } catch(e){}
 };
 
@@ -44,7 +70,6 @@ window.mostrarToast = function(texto){
   _toastTimer = setTimeout(() => t.classList.remove('visible'), 1700);
 };
 
-/* Barajar array */
 window.barajar = function(a){
   const x = a.slice();
   for (let i = x.length - 1; i > 0; i--){
@@ -54,7 +79,6 @@ window.barajar = function(a){
   return x;
 };
 
-/* Elegir n elementos al azar */
 window.elegirN = function(arr, n){
   return window.barajar(arr).slice(0, n);
 };

@@ -1,7 +1,6 @@
 /* ══════════════════ JUEGO 2: PALABRAS (ES/EN) ══════════════════ */
 
 (function(){
-  // "gen" = género del artículo en español (el / la / las)
   const PALABRAS = [
     { es:'ROJO',      en:'RED',      emoji:'🔴', gen:'el'  },
     { es:'AZUL',      en:'BLUE',     emoji:'🔵', gen:'el'  },
@@ -51,11 +50,15 @@
         const objetivo = elegidas[Math.floor(Math.random()*4)];
         st.objetivo = objetivo;
 
-        // Instrucción con el artículo correcto
         $('inst').innerHTML =
           `TOCA ${objetivo.gen.toUpperCase()} <span style="color:#22d3ee">${objetivo.es}</span>` +
           `<span class="en">TOUCH THE ${objetivo.en}</span>`;
-        window.decir('Toca ' + objetivo.gen + ' ' + objetivo.es + '. Touch the ' + objetivo.en);
+
+        // Voz bilingüe: español con acento español, inglés con acento inglés
+        window.decirBilingue(
+          'Toca ' + objetivo.gen + ' ' + objetivo.es,
+          'Touch the ' + objetivo.en
+        );
 
         const cont_op = $('opciones');
         cont_op.className = 'opciones';
@@ -80,12 +83,12 @@
           btn.classList.add('ok');
           window.tono(880,0.15,'triangle');
           setTimeout(() => window.tono(1100,0.15,'triangle'), 130);
-          window.decir('¡Muy bien! ' + p.es + '. ' + p.en);
+          window.decirBilingue('¡Muy bien! ' + p.es, 'Well done! ' + p.en);
           st.aciertos++;
           setTimeout(() => {
             st.bloqueado = false;
             ronda();
-          }, 900);
+          }, 1100);
         } else {
           btn.classList.add('mal');
           window.tono(200,0.3,'sawtooth');

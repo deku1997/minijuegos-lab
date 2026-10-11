@@ -33,7 +33,7 @@
   let raycaster, ndc;
   let dragging = null;
   let dragPlane = null;
-  let dragOffset = null;              // ← CORREGIDO: era new THREE.Vector3()
+  let dragOffset = null;
   let piezas = [];
   let piezasColocadas = new Set();
   let robotAssembly = null;
@@ -49,6 +49,7 @@
   let activo = true;
   let pointerBound = false;
   let slotVisuales = {};
+  let esMovil = false;
 
   /* ══════════════ HELPERS ══════════════ */
   const $ = id => document.getElementById(id);
@@ -282,21 +283,6 @@
         font-weight:800;
         color:#94a3b8;
       }
-      .rb3d-hint{
-        position:absolute;
-        left:50%; bottom:10px;
-        transform:translateX(-50%);
-        background:rgba(15,23,42,.85);
-        border:1px solid rgba(34,211,238,.4);
-        padding:6px 14px;
-        border-radius:20px;
-        font-size:clamp(10px,3vw,13px);
-        font-weight:700;
-        color:#22d3ee;
-        pointer-events:none;
-        white-space:nowrap;
-        box-shadow:0 0 15px rgba(34,211,238,.3);
-      }
     `;
     document.head.appendChild(s);
   }
@@ -311,16 +297,25 @@
     const W = wrap.clientWidth;
     const H = wrap.clientHeight;
 
+    // Detectar si es móvil para adaptar la cámara
+    esMovil = W < 600;
+
     scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x0a1526, 14, 28);
 
-    camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
-    camera.position.set(0, 3.5, 7.5);
-    camera.lookAt(0, 1, 0);
+    // Cámara adaptada al tamaño de pantalla
+    const FOV = esMovil ? 65 : 50;
+    const CAM_Y = esMovil ? 5.5 : 3.5;
+    const CAM_Z = esMovil ? 11  : 7.5;
+
+    camera = new THREE.PerspectiveCamera(FOV, W / H, 0.1, 100);
+    camera.position.set(0, CAM_Y, CAM_Z);
+    camera.lookAt(0, 0.8, 0);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // En móvil reducir pixel ratio para mejor rendimiento
+    renderer.setPixelRatio(esMovil ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x05080f, 1);
     wrap.appendChild(renderer.domElement);
     canvas = renderer.domElement;
@@ -699,7 +694,14 @@
       controlador: makeControlador
     };
 
-    const posiciones = {
+    // Posiciones adaptadas: en móvil las piezas están más separadas pero dentro de la vista
+    const posiciones = esMovil ? {
+      piernas:     new THREE.Vector3(2.2, 0.55, 2.2),
+      cuerpo:      new THREE.Vector3(-2.2, 0.55, 2.2),
+      motor:       new THREE.Vector3(2.2, 0.55, -2.2),
+      bateria:     new THREE.Vector3(-2.5, 0.55, -2.2),
+      controlador: new THREE.Vector3(0, 0.85, 3.0)
+    } : {
       piernas:     new THREE.Vector3(2.5, 0.55, 2.5),
       cuerpo:      new THREE.Vector3(-2.5, 0.55, 2.5),
       motor:       new THREE.Vector3(2.5, 0.55, -2.5),
@@ -711,6 +713,11 @@
       const group = makers[def.id]();
       group.position.copy(posiciones[def.id]);
       group.userData = { pieceId: def.id };
+
+      // En móvil, agrandar las piezas para que se puedan agarrar mejor
+      if (esMovil){
+        group.scale.setScalar(1.3);
+      }
 
       group.traverse(o => {
         if (o.isMesh){ o.userData.parentPiece = def.id; }
@@ -748,13 +755,12 @@
 
     dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -pieza.group.position.y);
 
-    // ★ CORREGIDO: crear dragOffset aquí, no al inicio del archivo
     const punto = new THREE.Vector3();
     raycaster.ray.intersectPlane(dragPlane, punto);
     dragOffset = pieza.group.position.clone().sub(punto);
 
     pieza.group.position.y += 0.15;
-    pieza.group.scale.setScalar(1.15);
+    pieza.group.scale.setScalar(esMovil ? 1.5 : 1.15);
   }
 
   function onPointerMove(e){
@@ -773,17 +779,19 @@
     const pieza = dragging;
     dragging = null;
 
-    pieza.group.scale.setScalar(1);
+    pieza.group.scale.setScalar(esMovil ? 1.3 : 1);
 
     const def = pieza.def;
     const slotPos = new THREE.Vector3(def.slotX || 0, def.slotY, def.slotZ || 0);
 
+    // En móvil el umbral es más generoso para facilitar el drop
+    const umbral = esMovil ? 1.4 : 1.0;
     const dist = Math.hypot(
       pieza.group.position.x - slotPos.x,
       pieza.group.position.z - slotPos.z
     );
 
-    if (dist < 1.0){
+    if (dist < umbral){
       if (def.requiereCarga && !bateriaCargada){
         window.tono(180, 0.3, 'sawtooth');
         window.decir('Primero carga la batería en el cargador');
@@ -798,7 +806,7 @@
     if (def.requiereCarga && !bateriaCargada && chargerGroup){
       const cp = chargerGroup.position;
       const dc = Math.hypot(pieza.group.position.x - cp.x, pieza.group.position.z - cp.z);
-      if (dc < 1.0){
+      if (dc < umbral + 0.2){
         iniciarCarga(pieza);
         return;
       }
@@ -843,8 +851,8 @@
     }
 
     setTimeout(() => {
-      pieza.group.scale.setScalar(1.25);
-      setTimeout(() => pieza.group.scale.setScalar(1), 180);
+      pieza.group.scale.setScalar(esMovil ? 1.5 : 1.25);
+      setTimeout(() => pieza.group.scale.setScalar(esMovil ? 1.3 : 1), 180);
     }, 350);
 
     setTimeout(() => {
@@ -942,7 +950,10 @@
     }, 40);
 
     setTimeout(() => {
-      animarCamara(new THREE.Vector3(0, 8.5, 6), new THREE.Vector3(0, 0.3, 0), 900);
+      // Vista de misión adaptada a móvil o escritorio
+      const camY = esMovil ? 12 : 8.5;
+      const camZ = esMovil ? 9  : 6;
+      animarCamara(new THREE.Vector3(0, camY, camZ), new THREE.Vector3(0, 0.3, 0), 900);
       setTimeout(() => iniciarMision(0), 1000);
     }, 1800);
   }
@@ -998,7 +1009,10 @@
       <div class="en">🎯 Mission ${idx+1}: ${m.en}</div>
       <div class="paso">Programa los pasos y presiona ▶ GO</div>
     `;
-    window.decir('Misión ' + (idx+1) + '. ' + m.es);
+    window.decirBilingue(
+      'Misión ' + (idx+1) + '. ' + m.es,
+      'Mission ' + (idx+1) + '. ' + m.en
+    );
 
     buildControlesMision();
   }
@@ -1278,7 +1292,7 @@
     api.sumarPuntos(puntos);
 
     window.melodia([880, 1100, 1320, 1580]);
-    window.decir('¡Excelente! ¡Misión cumplida!');
+    window.decirBilingue('¡Excelente! ¡Misión cumplida!', 'Well done! Mission accomplished!');
 
     const wrap = $('rb3d-canvas-wrap');
     const ov = document.createElement('div');
