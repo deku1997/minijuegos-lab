@@ -1,23 +1,24 @@
 /* ══════════════════ JUEGO 2: PALABRAS (ES/EN) ══════════════════ */
 
 (function(){
+  // "gen" = género del artículo en español (el / la / las)
   const PALABRAS = [
-    { es:'ROJO',     en:'RED',      emoji:'🔴' },
-    { es:'AZUL',     en:'BLUE',     emoji:'🔵' },
-    { es:'VERDE',    en:'GREEN',    emoji:'🟢' },
-    { es:'AMARILLO', en:'YELLOW',   emoji:'🟡' },
-    { es:'NARANJA',  en:'ORANGE',   emoji:'🟠' },
-    { es:'MORADO',   en:'PURPLE',   emoji:'🟣' },
-    { es:'ROSA',     en:'PINK',     emoji:'🐱' },
-    { es:'CAFÉ',     en:'BROWN',    emoji:'🟤' },
-    { es:'LÁPIZ',    en:'PENCIL',   emoji:'✏️' },
-    { es:'LIBRO',    en:'BOOK',     emoji:'📚' },
-    { es:'MOCHILA',  en:'BACKPACK', emoji:'🎒' },
-    { es:'TIJERAS',  en:'SCISSORS', emoji:'✂️' },
-    { es:'REGLA',    en:'RULER',    emoji:'📏' },
-    { es:'CRAYÓN',   en:'CRAYON',   emoji:'🖍️' },
-    { es:'PINCEL',   en:'BRUSH',    emoji:'🖌️' },
-    { es:'PEGAMENTO',en:'GLUE',     emoji:'🧴' }
+    { es:'ROJO',      en:'RED',      emoji:'🔴', gen:'el'  },
+    { es:'AZUL',      en:'BLUE',     emoji:'🔵', gen:'el'  },
+    { es:'VERDE',     en:'GREEN',    emoji:'🟢', gen:'el'  },
+    { es:'AMARILLO',  en:'YELLOW',   emoji:'🟡', gen:'el'  },
+    { es:'NARANJA',   en:'ORANGE',   emoji:'🟠', gen:'el'  },
+    { es:'MORADO',    en:'PURPLE',   emoji:'🟣', gen:'el'  },
+    { es:'ROSA',      en:'PINK',     emoji:'🐱', gen:'el'  },
+    { es:'CAFÉ',      en:'BROWN',    emoji:'🟤', gen:'el'  },
+    { es:'LÁPIZ',     en:'PENCIL',   emoji:'✏️', gen:'el'  },
+    { es:'LIBRO',     en:'BOOK',     emoji:'📚', gen:'el'  },
+    { es:'MOCHILA',   en:'BACKPACK', emoji:'🎒', gen:'la'  },
+    { es:'TIJERAS',   en:'SCISSORS', emoji:'✂️', gen:'las' },
+    { es:'REGLA',     en:'RULER',    emoji:'📏', gen:'la'  },
+    { es:'CRAYÓN',    en:'CRAYON',   emoji:'🖍️', gen:'el'  },
+    { es:'PINCEL',    en:'BRUSH',    emoji:'🖌️', gen:'el'  },
+    { es:'PEGAMENTO', en:'GLUE',     emoji:'🧴', gen:'el'  }
   ];
   const RONDAS = 6;
 
@@ -50,10 +51,11 @@
         const objetivo = elegidas[Math.floor(Math.random()*4)];
         st.objetivo = objetivo;
 
+        // Instrucción con el artículo correcto
         $('inst').innerHTML =
-          `TOCA EL <span style="color:#22d3ee">${objetivo.es}</span>` +
+          `TOCA ${objetivo.gen.toUpperCase()} <span style="color:#22d3ee">${objetivo.es}</span>` +
           `<span class="en">TOUCH THE ${objetivo.en}</span>`;
-        window.decir('Toca el ' + objetivo.es + '. Touch the ' + objetivo.en);
+        window.decir('Toca ' + objetivo.gen + ' ' + objetivo.es + '. Touch the ' + objetivo.en);
 
         const cont_op = $('opciones');
         cont_op.className = 'opciones';
