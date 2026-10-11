@@ -24,37 +24,69 @@ window.melodia = function(notas, dur=0.18, gap=135){
   notas.forEach((f,i) => setTimeout(() => window.tono(f, dur, 'triangle', 0.2), i * gap));
 };
 
+/* ══════════ PRECARGA DE VOCES (más velocidad) ══════════ */
+let _vozEs = null;
+let _vozEn = null;
+
+function _cargarVoces(){
+  if (!('speechSynthesis' in window)) return;
+  const voces = speechSynthesis.getVoices();
+  if (!voces || voces.length === 0) return;
+  _vozEs = voces.find(v => v.lang && v.lang.toLowerCase().startsWith('es')) || null;
+  _vozEn = voces.find(v => v.lang && v.lang.toLowerCase() === 'en-us') ||
+           voces.find(v => v.lang && v.lang.toLowerCase().startsWith('en')) || null;
+}
+
+if ('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = _cargarVoces;
+  _cargarVoces();
+  setTimeout(_cargarVoces, 400);
+  setTimeout(_cargarVoces, 1200);
+}
+
 /* ─── VOZ ESPAÑOL ─── */
 window.decir = function(texto){
   if (!window.SONIDO || !('speechSynthesis' in window)) return;
   try{
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texto);
-    u.lang = 'es-ES'; u.rate = 0.95; u.pitch = 1.25;
+    u.lang = 'es-ES'; u.rate = 1.1; u.pitch = 1.25;
+    if (_vozEs) u.voice = _vozEs;
     speechSynthesis.speak(u);
   } catch(e){}
 };
 
-/* ─── VOZ INGLÉS (evita que deletree palabras) ─── */
+/* ─── VOZ INGLÉS ─── */
 window.decirEn = function(texto){
   if (!window.SONIDO || !('speechSynthesis' in window)) return;
   try{
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texto);
-    u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.15;
+    u.lang = 'en-US'; u.rate = 1.0; u.pitch = 1.15;
+    if (_vozEn) u.voice = _vozEn;
     speechSynthesis.speak(u);
   } catch(e){}
 };
 
-/* ─── VOZ BILINGÜE: dice español y luego inglés ─── */
+/* ─── VOZ BILINGÜE RÁPIDA: habla español y luego inglés sin pausa ─── */
 window.decirBilingue = function(textoEs, textoEn){
   if (!window.SONIDO || !('speechSynthesis' in window)) return;
   try{
-    speechSynthesis.cancel();
+    // Detener lo que esté sonando
+    if (speechSynthesis.speaking || speechSynthesis.pending){
+      speechSynthesis.cancel();
+    }
+
+    // Creamos las dos voces con rate alto para que sea más rápido
     const u1 = new SpeechSynthesisUtterance(textoEs);
-    u1.lang = 'es-ES'; u1.rate = 0.95; u1.pitch = 1.25;
+    u1.lang = 'es-ES'; u1.rate = 1.15; u1.pitch = 1.2;
+    if (_vozEs) u1.voice = _vozEs;
+
     const u2 = new SpeechSynthesisUtterance(textoEn);
-    u2.lang = 'en-US'; u2.rate = 0.85; u2.pitch = 1.15;
+    u2.lang = 'en-US'; u2.rate = 1.05; u2.pitch = 1.1;
+    if (_vozEn) u2.voice = _vozEn;
+
+    // Se encolan: el motor los reproduce uno tras otro sin gap perceptible
     speechSynthesis.speak(u1);
     speechSynthesis.speak(u2);
   } catch(e){}

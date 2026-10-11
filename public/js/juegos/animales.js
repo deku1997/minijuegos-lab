@@ -22,7 +22,6 @@
   const RONDAS = 8;
   const LETRAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-  // Nombres de las letras en español e inglés para pronunciarlas correctamente
   const NOMBRE_ES = {
     'A':'a','B':'be','C':'ce','D':'de','E':'e','F':'efe','G':'ge','H':'hache',
     'I':'i','J':'jota','K':'ka','L':'ele','M':'eme','N':'ene','Ñ':'eñe','O':'o',
@@ -196,7 +195,6 @@
           `Completa la palabra: <span style="color:#22d3ee">${animal.es}</span>` +
           `<span class="en">Complete the word: ${animal.en}</span>`;
 
-        // Voz bilingüe correcta
         window.decirBilingue(
           'Completa la palabra. ' + animal.es,
           'Complete the word. ' + animal.en
@@ -252,7 +250,7 @@
           return;
         }
 
-        // Pronunciar la letra según la fase (español o inglés)
+        // Decir la letra en el idioma que toca
         if (st.fase === 'es'){
           window.decir(NOMBRE_ES[letra] || letra);
         } else {
@@ -278,31 +276,43 @@
 
         if (completo){
           st.palabraCompletada = true;
-          window.melodia([880, 1100]);
+          st.bloqueado = true;  // Bloquea clics durante la transición
 
-          if (st.fase === 'es'){
-            window.decirBilingue(
-              '¡Muy bien! Ahora en inglés',
-              'Now in English: ' + st.animal.en
-            );
-            setTimeout(() => {
-              st.fase = 'en';
-              st.palabraCompletada = false;
-              st.letrasUsadas = [];
-              pintarPalabra('en', st.animal.en, []);
-              construirBanco(st.animal.en);
-              $('inst').innerHTML =
-                `Ahora en inglés: <span style="color:#e879f9">${st.animal.en}</span>` +
-                `<span class="en">Now in English: ${st.animal.en}</span>`;
-            }, 1400);
-          } else {
-            st.aciertos++;
-            window.decirBilingue(
-              '¡Excelente! ' + st.animal.es,
-              'Excellent! ' + st.animal.en
-            );
-            setTimeout(() => { ronda(); }, 1400);
-          }
+          // Esperar 700ms para que la última letra termine de sonar
+          setTimeout(() => {
+            window.melodia([880, 1100]);
+
+            if (st.fase === 'es'){
+              // Terminó español → pasa a inglés
+              window.decirBilingue(
+                '¡Muy bien! Ahora en inglés',
+                'Now in English: ' + st.animal.en
+              );
+              // Esperar a que termine el mensaje antes de cambiar de fase
+              setTimeout(() => {
+                st.fase = 'en';
+                st.palabraCompletada = false;
+                st.bloqueado = false;
+                st.letrasUsadas = [];
+                pintarPalabra('en', st.animal.en, []);
+                construirBanco(st.animal.en);
+                $('inst').innerHTML =
+                  `Ahora en inglés: <span style="color:#e879f9">${st.animal.en}</span>` +
+                  `<span class="en">Now in English: ${st.animal.en}</span>`;
+              }, 1800);
+            } else {
+              // Terminó inglés → cuenta acierto y pasa a siguiente ronda
+              st.aciertos++;
+              window.decirBilingue(
+                '¡Excelente! ' + st.animal.es,
+                'Excellent! ' + st.animal.en
+              );
+              setTimeout(() => {
+                st.bloqueado = false;
+                ronda();
+              }, 2000);
+            }
+          }, 700);
         }
       }
 
