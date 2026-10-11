@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏆 Clasificación - Minijuegos</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family:'Baloo 2','Comic Sans MS',sans-serif;
+    background:linear-gradient(160deg,#1e3a8a,#4c1d95 55%,#7e22ce);
+    color:#fff; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:24px; overflow:hidden;
+  }
+  h1{ font-size:clamp(38px,7vw,80px); margin-bottom:8px;
+      text-shadow:0 6px 0 rgba(0,0,0,.35); }
+  .sub{ font-size:clamp(16px,2vw,24px); opacity:.8; margin-bottom:26px; }
+  ol{ list-style:none; width:min(94vw,1000px); }
+  .fila{
+    display:flex; align-items:center; gap:20px;
+    background:rgba(255,255,255,.95); color:#1e293b;
+    border-radius:22px; padding:14px 26px; margin-bottom:12px;
+    font-size:clamp(20px,2.6vw,34px); font-weight:800;
+    box-shadow:0 6px 0 rgba(0,0,0,.3);
+    animation:entrar .4s ease;
+  }
+  @keyframes entrar{ from{opacity:0; transform:translateX(-30px)} to{opacity:1; transform:none} }
+  .fila:nth-child(1){ background:linear-gradient(90deg,#fde047,#fbbf24); }
+  .fila:nth-child(2){ background:linear-gradient(90deg,#e2e8f0,#cbd5e1); }
+  .fila:nth-child(3){ background:linear-gradient(90deg,#fdba74,#fb923c); }
+  .puesto{ width:70px; text-align:center; }
+  .avatar{ font-size:1.3em; }
+  .nombre{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .puntos{ color:#b45309; }
+  .vacio{ justify-content:center; color:#94a3b8; }
+</style>
+</head>
+<body>
+  <h1>🏆 CLASIFICACIÓN 🏆</h1>
+  <p class="sub">MINIJUEGOS</p>
+  <ol id="lista"></ol>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const medallas = ['🥇','🥈','🥉'];
+
+  socket.on('tabla', lista => {
+    const ol = document.getElementById('lista');
+    ol.innerHTML = '';
+    if (!lista.length){
+      ol.innerHTML = '<li class="fila vacio">Esperando jugadores... 🎮</li>';
+      return;
+    }
+    lista.slice(0,10).forEach((j,i)=>{
+      const li = document.createElement('li');
+      li.className = 'fila';
+      li.innerHTML =
+        '<span class="puesto">' + (medallas[i] || (i+1)) + '</span>' +
+        '<span class="avatar">' + j.avatar + '</span>' +
+        '<span class="nombre">' + j.nombre.replace(/[<>&"]/g,'') + '</span>' +
+        '<span class="puntos">' + j.puntos + ' ⭐</span>';
+      ol.appendChild(li);
+    });
+  });
+</script>
+</body>
+</html>

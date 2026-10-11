@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>🎮 MINIJUEGOS LAB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<!-- ══════════════════ REGISTRO ══════════════════ -->
+<section id="p-registro" class="pantalla activa">
+  <div class="tarjeta">
+    <h1 class="logo">🎮 MINIJUEGOS LAB</h1>
+    <p class="subtitulo">Aprende jugando 🤖🎨🐾</p>
+    <label class="etiqueta" for="inp-nombre">¿Cómo te llamas?</label>
+    <input id="inp-nombre" class="campo" type="text" maxlength="12"
+           placeholder="Escribe tu nombre" autocomplete="off" autocapitalize="words">
+    <button id="btn-entrar" class="btn btn-grande btn-verde">▶ ¡ENTRAR!</button>
+    <button id="btn-tabla-reg" class="btn btn-plano">🏆 Ver clasificación</button>
+  </div>
+</section>
+
+<!-- ══════════════════ MENÚ ══════════════════ -->
+<section id="p-menu" class="pantalla">
+  <header class="hud">
+    <div class="hud-chip"><span class="hud-avatar">🤖</span> <b class="hud-nombre">—</b></div>
+    <div class="hud-chip hud-puntos">⭐ <b class="hud-puntos-valor">0</b></div>
+    <button class="hud-btn" id="btn-sonido" title="Sonido">🔊</button>
+    <button class="hud-btn" id="btn-tabla" title="Clasificación">🏆</button>
+    <button class="hud-btn" id="btn-salir" title="Cambiar jugador">🚪</button>
+  </header>
+
+  <h2 class="titulo-seccion">Elige un juego 👇</h2>
+  <div id="lista-juegos" class="lista-juegos"></div>
+</section>
+
+<!-- ══════════════════ JUEGO ══════════════════ -->
+<section id="p-juego" class="pantalla">
+  <header class="hud">
+    <button class="hud-btn" id="btn-volver">⬅</button>
+    <div class="hud-chip"><span class="hud-avatar">🤖</span> <b class="hud-nombre">—</b></div>
+    <div class="hud-chip hud-puntos">⭐ <b class="hud-puntos-valor">0</b></div>
+    <button class="hud-btn" id="btn-tabla2">🏆</button>
+  </header>
+  <div id="juego-contenedor" class="juego-contenedor"></div>
+</section>
+
+<!-- ══════════════════ OVERLAY: VICTORIA ══════════════════ -->
+<div id="ov-win" class="overlay">
+  <div class="tarjeta tarjeta-win">
+    <div class="estrellas">⭐ ⭐ ⭐</div>
+    <h2 class="win-titulo">¡MUY BIEN!</h2>
+    <p class="win-sub">Ganaste <b id="win-pts">10</b> puntos</p>
+    <button id="btn-otra" class="btn btn-grande btn-verde">🔄 Jugar otra vez</button>
+    <button id="btn-menu-win" class="btn btn-plano">🏠 Ir al menú</button>
+  </div>
+</div>
+
+<!-- ══════════════════ OVERLAY: FIN DEL JUEGO ══════════════════ -->
+<div id="ov-fin" class="overlay">
+  <div class="tarjeta tarjeta-win">
+    <div class="estrellas">🏆 🎉 🏆</div>
+    <h2 class="win-titulo">¡TERMINASTE!</h2>
+    <p class="win-sub">Ganaste <b id="fin-pts">0</b> puntos en total</p>
+    <button id="btn-otra-fin" class="btn btn-grande btn-verde">🔄 Jugar otra vez</button>
+    <button id="btn-menu-fin" class="btn btn-plano">🏠 Ir al menú</button>
+  </div>
+</div>
+
+<!-- ══════════════════ OVERLAY: TABLA ══════════════════ -->
+<div id="ov-tabla" class="overlay">
+  <div class="tarjeta tarjeta-tabla">
+    <h2 class="win-titulo">🏆 CLASIFICACIÓN</h2>
+    <ol id="lista-tabla" class="lista-tabla"></ol>
+    <button id="btn-cerrar-tabla" class="btn btn-grande btn-azul">Cerrar</button>
+    <button id="btn-borrar-tabla" class="btn btn-plano btn-mini">🗑️ Borrar toda la tabla (profe)</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/juegos/robotito.js"></script>
+<script src="js/juegos/palabras.js"></script>
+<script src="js/juegos/suma.js"></script>
+<script src="js/juegos/animales.js"></script>
+<script src="js/juegos/globos.js"></script>
+<script src="js/juegos/grandes.js"></script>
+<script src="js/juegos/robot_builder.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
