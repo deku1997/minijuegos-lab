@@ -1,27 +1,28 @@
 /* ══════════════════ JUEGO 9: ANIMALES (selección) ══════════════════ */
 
 (function(){
+  // "gen" = artículo correcto en español (el / la)
   const ANIMALES = [
-    { es:'PERRO',   en:'DOG',    emoji:'🐶' },
-    { es:'GATO',    en:'CAT',    emoji:'🐱' },
-    { es:'VACA',    en:'COW',    emoji:'🐮' },
-    { es:'PATO',    en:'DUCK',   emoji:'🦆' },
-    { es:'PEZ',     en:'FISH',   emoji:'🐟' },
-    { es:'OSO',     en:'BEAR',   emoji:'🐻' },
-    { es:'RANA',    en:'FROG',   emoji:'🐸' },
-    { es:'PÁJARO',  en:'BIRD',   emoji:'🐦' },
-    { es:'LEÓN',    en:'LION',   emoji:'🦁' },
-    { es:'TIGRE',   en:'TIGER',  emoji:'🐯' },
-    { es:'MONO',    en:'MONKEY', emoji:'🐵' },
-    { es:'ZORRO',   en:'FOX',    emoji:'🦊' },
-    { es:'LOBO',    en:'WOLF',   emoji:'🐺' },
-    { es:'OVEJA',   en:'SHEEP',  emoji:'🐑' },
-    { es:'CABRA',   en:'GOAT',   emoji:'🐐' },
-    { es:'CABALLO', en:'HORSE',  emoji:'🐴' },
-    { es:'CONEJO',  en:'RABBIT', emoji:'🐰' },
-    { es:'TORTUGA', en:'TURTLE', emoji:'🐢' },
-    { es:'ABEJA',   en:'BEE',    emoji:'🐝' },
-    { es:'MARIPOSA',en:'BUTTERFLY', emoji:'🦋' }
+    { es:'PERRO',   en:'DOG',      emoji:'🐶', gen:'el' },
+    { es:'GATO',    en:'CAT',      emoji:'🐱', gen:'el' },
+    { es:'VACA',    en:'COW',      emoji:'🐮', gen:'la' },
+    { es:'PATO',    en:'DUCK',     emoji:'🦆', gen:'el' },
+    { es:'PEZ',     en:'FISH',     emoji:'🐟', gen:'el' },
+    { es:'OSO',     en:'BEAR',     emoji:'🐻', gen:'el' },
+    { es:'RANA',    en:'FROG',     emoji:'🐸', gen:'la' },
+    { es:'PÁJARO',  en:'BIRD',     emoji:'🐦', gen:'el' },
+    { es:'LEÓN',    en:'LION',     emoji:'🦁', gen:'el' },
+    { es:'TIGRE',   en:'TIGER',    emoji:'🐯', gen:'el' },
+    { es:'MONO',    en:'MONKEY',   emoji:'🐵', gen:'el' },
+    { es:'ZORRO',   en:'FOX',      emoji:'🦊', gen:'el' },
+    { es:'LOBO',    en:'WOLF',     emoji:'🐺', gen:'el' },
+    { es:'OVEJA',   en:'SHEEP',    emoji:'🐑', gen:'la' },
+    { es:'CABRA',   en:'GOAT',     emoji:'🐐', gen:'la' },
+    { es:'CABALLO', en:'HORSE',    emoji:'🐴', gen:'el' },
+    { es:'CONEJO',  en:'RABBIT',   emoji:'🐰', gen:'el' },
+    { es:'TORTUGA', en:'TURTLE',   emoji:'🐢', gen:'la' },
+    { es:'ABEJA',   en:'BEE',      emoji:'🐝', gen:'la' },
+    { es:'MARIPOSA',en:'BUTTERFLY',emoji:'🦋', gen:'la' }
   ];
 
   const RONDAS = 8;
@@ -53,12 +54,14 @@
         const objetivo = elegidos[Math.floor(Math.random()*4)];
         st.objetivo = objetivo;
 
+        // Instrucción con el artículo correcto (EL / LA)
         $('inst').innerHTML =
-          `TOCA EL <span style="color:#22d3ee">${objetivo.es}</span>` +
+          `TOCA ${objetivo.gen.toUpperCase()} <span style="color:#22d3ee">${objetivo.es}</span>` +
           `<span class="en">TOUCH THE ${objetivo.en}</span>`;
 
+        // Voz bilingüe con el artículo correcto
         window.decirBilingue(
-          'Toca el ' + objetivo.es.toLowerCase(),
+          'Toca ' + objetivo.gen + ' ' + objetivo.es.toLowerCase(),
           'Touch the ' + objetivo.en.toLowerCase()
         );
 
@@ -85,9 +88,12 @@
           btn.classList.add('ok');
           window.tono(880,0.15,'triangle');
           setTimeout(() => window.tono(1100,0.15,'triangle'), 130);
-          window.decirBilingue('¡Muy bien! ' + p.es, 'Well done! ' + p.en);
+          window.decirBilingue(
+            '¡Muy bien! ' + p.es.toLowerCase(),
+            'Well done! ' + p.en.toLowerCase()
+          );
           st.aciertos++;
-          setTimeout(ronda, 1100);
+          setTimeout(ronda, 1200);
         } else {
           btn.classList.add('mal');
           window.tono(200,0.3,'sawtooth');
