@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════
-   MINIJUEGOS LAB — Tema Alta Tecnología (v3)
+   MINIJUEGOS LAB — Tema Alta Tecnología (v4)
    ══════════════════════════════════════════════════════════ */
 
 :root{
@@ -49,6 +49,7 @@ html,body{
   padding-top:calc(8px + env(safe-area-inset-top));
   padding-bottom:calc(8px + env(safe-area-inset-bottom));
   overflow:hidden;
+  min-height:0;
 }
 .pantalla.activa{ display:flex; }
 #p-registro{ align-items:center; justify-content:center; }
@@ -144,31 +145,54 @@ html,body{
 .hud-btn:hover{ border-color:var(--neon-cyan); box-shadow:0 0 10px rgba(34,211,238,.3); }
 .hud-btn:active{ transform:translateY(2px); }
 
-/* ══════════════ Menú ══════════════ */
+/* ══════════════ Menú (con scroll funcional) ══════════════ */
 .titulo-seccion{
   text-align:center; color:var(--text-light);
   font-family:var(--font-display);
-  font-size:clamp(16px,4.5vw,22px);
-  margin:4px 0 0; font-weight:700; letter-spacing:1px;
+  font-size:clamp(14px,4vw,20px);
+  margin:0; font-weight:700; letter-spacing:1px;
   text-shadow:0 0 15px rgba(34,211,238,.4);
+  flex-shrink:0;
+  padding:4px 0;
 }
+
 .lista-juegos{
-  flex:1; overflow-y:auto;
-  display:grid; gap:12px;
+  flex:1 1 0;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  display:grid;
+  gap:8px;
   grid-template-columns:1fr;
-  padding:8px 2px 20px;
+  padding:6px 4px 40px;
+  scrollbar-width:thin;
+  scrollbar-color: rgba(34,211,238,.5) transparent;
 }
-@media(min-width:600px){ .lista-juegos{ grid-template-columns:1fr 1fr; } }
+.lista-juegos::-webkit-scrollbar{ width:6px; }
+.lista-juegos::-webkit-scrollbar-track{ background:transparent; }
+.lista-juegos::-webkit-scrollbar-thumb{
+  background:rgba(34,211,238,.5);
+  border-radius:3px;
+}
+@media(min-width:600px){
+  .lista-juegos{ grid-template-columns:1fr 1fr; }
+}
+
 .juego-card{
   background:rgba(30,41,59,.8);
   border:1px solid rgba(34,211,238,.2);
-  border-radius:22px; padding:14px 16px;
-  display:flex; align-items:center; gap:14px;
-  box-shadow:0 5px 0 rgba(0,0,0,.4);
+  border-radius:16px;
+  padding:10px 12px;
+  display:flex; align-items:center; gap:10px;
+  box-shadow:0 4px 0 rgba(0,0,0,.4);
   cursor:pointer; text-align:left;
   font-family:var(--font-body); color:var(--text-light);
   transition:transform .1s, box-shadow .1s, border-color .2s;
   position:relative; overflow:hidden;
+  flex-shrink:0;
+  min-height:60px;
 }
 .juego-card::before{
   content:''; position:absolute; top:0; left:0; width:3px; height:100%;
@@ -176,28 +200,43 @@ html,body{
 }
 .juego-card:hover::before{ opacity:1; }
 .juego-card:hover{ border-color:rgba(34,211,238,.5); }
-.juego-card:active{ transform:translateY(4px); box-shadow:0 1px 0 rgba(0,0,0,.4); }
+.juego-card:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.4); }
 .juego-card .ic{
-  font-size:44px; width:60px; height:60px;
+  font-size:32px; width:46px; height:46px;
   display:flex; align-items:center; justify-content:center;
   background:rgba(15,23,42,.8);
   border:1px solid rgba(34,211,238,.2);
-  border-radius:18px; flex-shrink:0;
+  border-radius:12px; flex-shrink:0;
 }
 .juego-card .info{ flex:1; min-width:0; }
 .juego-card .titulo{
-  font-size:18px; font-weight:800; margin:0 0 2px;
+  font-size:14px; font-weight:800; margin:0 0 1px;
   color:var(--text-light);
-  font-family:var(--font-display); letter-spacing:1px;
+  font-family:var(--font-display); letter-spacing:.5px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.juego-card .desc{ font-size:13px; color:var(--text-dim); margin:0; font-weight:600; line-height:1.2; }
+.juego-card .desc{
+  font-size:11px; color:var(--text-dim); margin:0;
+  font-weight:600; line-height:1.15;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
 .juego-card .edad{
-  font-size:11px; font-weight:800; padding:3px 8px;
-  border-radius:10px;
+  font-size:10px; font-weight:800; padding:2px 6px;
+  border-radius:8px;
   background:rgba(232,121,249,.15);
   color:var(--neon-pink);
   border:1px solid rgba(232,121,249,.3);
   white-space:nowrap;
+  flex-shrink:0;
+}
+
+/* En pantallas bajas, tarjetas aún más compactas */
+@media (max-height: 700px){
+  .juego-card{ padding:8px 10px; min-height:52px; }
+  .juego-card .ic{ font-size:26px; width:38px; height:38px; }
+  .juego-card .titulo{ font-size:13px; }
+  .juego-card .desc{ font-size:10px; }
+  .juego-card .edad{ font-size:9px; }
 }
 
 /* ══════════════ Contenedor de juego ══════════════ */
@@ -338,7 +377,7 @@ html,body{
 .toast.visible{ opacity:1; transform:translate(-50%,0); }
 
 /* ══════════════════════════════════════════════════════════
-   ROBOTITO — D-Pad más compacto, más espacio al tablero
+   ROBOTITO — D-Pad compacto, más espacio al tablero
    ══════════════════════════════════════════════════════════ */
 .zona-tablero{
   flex:1 1 0%;
@@ -411,7 +450,6 @@ html,body{
   outline-offset:1px;
 }
 
-/* D-Pad compacto */
 .dpad{
   display:grid;
   grid-template-areas:". u ." "l c r" ". d .";
